@@ -1,0 +1,858 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Atypical Urban Planner">
+    <title>浙大数据结构笔记 - Atypical Urban Planner</title>
+    <meta name="author" content="Huang">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Huang","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"articleBody":"\n\n前言系统学习数据结构\n课程地址：https://www.icourse163.org/learn/ZJU-93001\n一、基本概念1.什么是数据结构1.1其他定义\n数据结构是数据对象，以及存在于该对象的实例和组成实例的数据元素之间的各种联系。这些联系可以通过定义相关的函数来给出。 ——Sartaj Sahni 《数据结构、算法与应用》\n数据结构是 ADT（Abstract Data Type，数据抽象类型）的物理实现。 ——Clifford A.Shaffer 《数据结构与算法分析》\n数据结构（data structure）是计算机中存储、组织数据的方式。通常情况下，精心选择的数据结构可以带来最优效率的算法。 ——中文维基百科\n\n1.2解决问题方法的效率\n跟数组的组织方式有关\n\n跟空间的利用效率有关\n\n跟算法的巧妙程度有关\n计算运行时间Q:函数单次运行时间过短？\nA:让被测函数重复运行多次，取平均时间\n\n\n计算被测函数运行时间模版\n1234567891011#include&lt;stdio&gt;#include&lt;time.h&gt;clock_t start,end;double duration;int main()&#123;  start = clock();  MyFunction();  stop = clock;  duration = (double(stop - start)/CLK_TCK);  return&#125;\n1.3 最终定义\n数据对象在计算机中的组织方式\n逻辑结构\n物理存储结构\n\n\n数据对象必定与一系列加在其上的操作相关联\n完成这些操作所用的方法就是算法\n\n1.4 抽象数据类型（Abstract Data Type）\n数据类型\n\n数据对象集\n数据集合相关联的操作集\n\n\n抽象：描述数据类型的方法不依赖于具体实现\n\n与存放数据的机器无关\n与数据存储的物理结构无关\n与实现操作的算法和编程语言均无关\n\n抽象不关心具体实现细节，关心的是宏观程度上把握程序的整体架构\n\n\n2.什么是算法2.1.定义\n一个有限指令集\n接受一些输入\n一定在有限步骤之后终止\n\n每一条指令必须\n\n有充分明确的目标，不可以有歧义\n计算机能处理范围内\n描述应不依赖于任何一种计算机语言以及具体的实现手段\n\n\n\n2.2 描述算法的手段\n空间复杂度 S(n)\n根据算法写成的程序在执行时占用存储空间的长度\n\n时间复杂度 T(n)\n根据算法写成的程序在执行时耗费的时间的长度\n\n\n递归函数每递归一次，都需要将parent process的寄存器信息压入栈中\n2.3 评价在分析一般算法的效率时，常常关注\n\n最坏情况复杂度 $ T_{worst}(n) $\n\n平均情况复杂度 $T_{avg}(n) $\n\n\n\nT_{arg}(n) \\le T_{worst}(n)一般情况下更多关注的是最坏情况复杂度\n2.4 复杂度的渐进表达\n$T(n)=O(f(n))$ 表示存在常数$C&gt;0，n_0&gt;0 $使得当 $n \\ge n_0$时有$T(n)≤C⋅f(n)$, 即 $O(f(n))$表示 $f(n)$是 $T(n) $的某种上界\n$T(n)=Ω(g(n))$ 表示存在常数$C&gt;0，n_0&gt;0 $使得当 $n \\ge n_0$时有$T(n)≤C⋅g(n)$, 即 $Ω(g(n))$表示 $f(n)$是 $T(n) $的某种下界\n$T(n)=θ(h(n))$ 表示存在常数$C&gt;0，n_0&gt;0 $使得当 $n \\ge n_0$时有$T(n)≤C⋅h(n)$, 即 $θ(f(n))$表示 $f(n)$是 $T(n) $的上界也是下界\n\n2.5 复杂度分析小窍门\n若两段算法分别有复杂度 $T_1(n)=O(f1(n))$和$T_2(n) = O(f_2(n))$，则\n\n\n$T_1(n)+T_2(n)=max(O(f_1(n)),O(f_2(n)))$\n$T_1(n)\\times T_2(n)=O(f_1(n))\\times O(f_2(n))$\n\n\n若$T(n)$是关于$n$的$k$阶多项式，那么$T(n)=\\theta(n^k)$\n一个 for 循环的时间复杂度等于循环次数乘以循环体代码的复杂度\n\nif-else 结构的复杂度取决于 if 的条件判断复杂度和两个分枝部分的复杂度，总体复杂度取三者中最大\n\n\n3. 最大子列集问题题目：给定N个整数的序列$\\{A_1,A_2,A_3,…,A_N\\}$求函数$f(i,j)=max\\{0,\\sum_{k=0}^j A_k \\}$\n算法一（暴力法）：1234567891011121314int MaxSubseqSum1(int A[],int N)&#123;  int ThisSum, MaxSum = 0;  int i, j, k;  for(i=0, i&lt;N; i++)&#123;/*子列左端*/    for(j=i; j&lt;N; j++)&#123;/*子列右端*/      ThisSum = 0;      for(k=i; k&lt;=j; k++)        ThisSum += A[k];      if(ThisSum &gt; MaxSum)        MaxSum = ThisSum;    &#125;  &#125;  return MaxSum;&#125;\n时间复杂度：$O(N^3)$\n改进方法：每次计算ThisSum是不必重新计算，只需与后续元素直接相加\n算法二（改进暴力法）：123456789101112int MaxSubseqSum2(int A[],int N)&#123;  int ThisSum, MaxSum = 0;  int i, j, k;  for(i=0, i&lt;N; i++)&#123;/*子列左端*/    for(j=i; j&lt;N; j++)&#123;/*子列右端*/      ThisSum += A[j];      if(ThisSum &gt; MaxSum)        MaxSum = ThisSum;    &#125;  &#125;  return MaxSum;&#125;\n时间复杂度：$O(N^2)$\n算法三（分而治之）：1234567891011121314151617181920212223242526272829303132333435363738394041424344454647 int Max3( int A, int B, int C )&#123; /* 返回3个整数中的最大值 */    return A &gt; B ? A &gt; C ? A : C : B &gt; C ? B : C;&#125; int DivideAndConquer( int List[], int left, int right )&#123; /* 分治法求List[left]到List[right]的最大子列和 */    int MaxLeftSum, MaxRightSum; /* 存放左右子问题的解 */    int MaxLeftBorderSum, MaxRightBorderSum; /*存放跨分界线的结果*/     int LeftBorderSum, RightBorderSum;    int center, i;     if( left == right )  &#123; /* 递归的终止条件，子列只有1个数字 */        if( List[left] &gt; 0 )  return List[left];        else return 0;    &#125;     /* 下面是\"分\"的过程 */    center = ( left + right ) / 2; /* 找到中分点 */    /* 递归求得两边子列的最大和 */    MaxLeftSum = DivideAndConquer( List, left, center );    MaxRightSum = DivideAndConquer( List, center+1, right );     /* 下面求跨分界线的最大子列和 */    MaxLeftBorderSum = 0; LeftBorderSum = 0;    for( i=center; i&gt;=left; i-- ) &#123; /* 从中线向左扫描 */        LeftBorderSum += List[i];        if( LeftBorderSum &gt; MaxLeftBorderSum )            MaxLeftBorderSum = LeftBorderSum;    &#125; /* 左边扫描结束 */     MaxRightBorderSum = 0; RightBorderSum = 0;    for( i=center+1; i&lt;=right; i++ ) &#123; /* 从中线向右扫描 */        RightBorderSum += List[i];        if( RightBorderSum &gt; MaxRightBorderSum )            MaxRightBorderSum = RightBorderSum;    &#125; /* 右边扫描结束 */     /* 下面返回\"治\"的结果 */    return Max3( MaxLeftSum, MaxRightSum, MaxLeftBorderSum + MaxRightBorderSum );&#125; int MaxSubseqSum3( int List[], int N )&#123; /* 保持与前2种算法相同的函数接口 */    return DivideAndConquer( List, 0, N-1 );&#125;\n时间复杂度：$O(NlogN)$\n\nT(N) = 2T(N/2)+cN, \\qquad T(1)=O(1)\\\\\n=2[2T(N/2^2)+c N/2]+cN\\\\\n其中N/2^k=1算法四（在线处理）：123456789101112int MaxSubseqSum4(int A[],int N)&#123;  int ThisSum, MaxSum = 0;  int i, j, k;  for(i=0, i&lt;N; i++)&#123;    ThisSum += A[i];/*向右累加*/    if(ThisSum &gt; MaxSum)      MaxSum = ThisSum;    else if(ThisSum&lt;0)/*当前子列和为负*/      ThisSum = 0;/*则不可能使后面的部分和增大，抛弃*/  &#125;  return MaxSum;&#125;\n时间复杂度：$O(N)$\n二、线性结构1.线性表及其实现1. 1什么是线性表 “线性表”：由同类型数据元素构成有序序列的线性结构\n\n表中元素个数称为线性表的长度\n线性表没有元素时，称为空表\n表起始位置称为表头，表结束位置称表尾\n\n1.2线性表的抽象数据类型描述\n类型名称：线性表（List）\n\n数据对象集：线性表是 $n(≥0)$个元素构成的有序序列$(a_1,a_2,…,a_n)$\n\n操作集：线性表 $L\\in List$ ，整数 i 表示位置，元素 $X\\in ElementType$\n\n线性表基本操作主要有：\n\nList MakeEmpty()： 初始化一个空线性表 L\nElementType FindKth(int K,List L)：根据位序 K，返回相应元素\nint Find(ElementType X,List L)：在线性表 L 中查找 X 的第一次出现位置\nvoid Insert(ElementType X,int i,List L)：在位序 i 前插入一个新元素 X\nvoid Delete(int i,List L)：删除指定位序 i 的元素\nint Length(List L)：返回线性表 L 的长度 n\n\n\n\n1.3存储实现方法1.3.1顺序存储实现12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758typedf struct LNode *List;struct LNode&#123;  ElementType Data[MAXSIZE];  int Last;&#125;;struct LNode L;List PtrL;/*initail*/List MakeEmpty()&#123;  List PtrL;  PtrL = (List)malloc(sizeof(struct LNode));  PtrL-&gt;Last = -1;  return PtrL;&#125;/*Find element*/int Find(ElementType X,List PtrL)&#123;  int i = 0;  while(i &lt;= PtrL-&gt;Last &amp;&amp; PtrL-&gt;Data[i]!=X)i++;  if(i &gt; PtrL-&gt;Last) return -1;  else return i;&#125;/*insert element*/void Insert(ElementType X,int i,List PtrL)&#123;  int j;  if(PtrL-&gt;Last == MAXSIZE-1)&#123;    printf(\"Full\");    return;  &#125;  if(i&lt;1 || i&gt;PtrL-&gt;Last+2)&#123;    printf(\"unfair position\");    return;  &#125;  for(j=PtrL-&gt;Last; j&gt;=i;j--)&#123;    PtrL-&gt;Data[j+1] = PtrL-&gt;Data[j];  &#125;  PtrL-&gt;Data[i-1] = X;  PtrL-&gt;Last++;  return;&#125;/*平均移动次数为n/2*//*平均时间性能是O（n）*/void Delete(int i,List PtrL)&#123;  int j;  if(i&lt;1 || i&gt;PtrL-&gt;Last+1)&#123;    printf(\"不存在第%d个元素\",i);    return;  &#125;  for(j=i; j&lt;=PtrL-&gt;Last; j++)&#123;    PtrL-&gt;Data[j-1] = PtrL-&gt;Data[j];  &#125;  PtrL-&gt;Last--;&#125;/*平均移动次数为(n-1)/2*//*平均时间性能是O（n）*/\n1.3.1链式存储实现 不要求逻辑上相邻的两个元素物理上也相邻，通过”链”建立起数据之间的逻辑关系\n\n插入、删除不需要移动数据元素，只需要修改”链”\n\n123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123124125126127128129130131132133134135136137138139140141142143144145146147148149150151152153typedef int ElementType; // ElementType 可定义为任意类型typedef struct LNode *List;struct LNode&#123;\tElementType Data;   //数据域 \tList Next;   // 下一个链表的地址 &#125;; List L;List MakeEmpty(); //初始化链表 int Length(List L);  // 以遍历链表的方法求链表长度 List FindKth(int K,List L);  // 按序号查找 List Find(ElementType X,List L);  // 按值查找 List Insert(ElementType X,int i,List L);  //将 X 插入到第 i-1(i&gt;0) 个结点之后 List Delete(int i,List L); // 删除第 i(i&gt;0) 个结点 void Print(List L); // 输出链表元素 // 初始化链表 List MakeEmpty()&#123;\tList L = (List)malloc(sizeof(struct LNode));\tL = NULL;\treturn L;&#125;//求表长 int Length(List L)&#123;\tList p = L;\tint len=0;\twhile(p)&#123;  // 当 p 不为空 \t\tp = p-&gt;Next;\t\tlen++;\t&#125;\treturn len;&#125; // 按序查找 List FindKth(int K,List L)&#123;\tList p = L;\tint i = 1;  //从 1 开始 \twhile(p &amp;&amp; i&lt;K)&#123;\t\tp = p-&gt;Next;\t\ti++;\t&#125;\tif(i == K)    // 找到了 \t\treturn p;\telse    // 未找到 \t\treturn NULL;&#125; // 按值查找  List Find(ElementType X,List L)&#123;\tList p = L;\twhile(p &amp;&amp; p-&gt;Data!=X)\t\tp = p-&gt;Next;\t// 找到了，返回 p\t// 未找到，返回 NULL，此时 p 等于 NULL \treturn p;   &#125; /* 插入1. 用 s 指向一个新的结点2. 用 p 指向链表的第 i-1 个结点 3. s-&gt;Next = p-&gt;Next，将 s 的下一个结点指向 p 的下一个结点 4. p-&gt;Next = s，将 p 的下一结点改为 s   */List Insert(ElementType X,int i,List L)&#123;\tList p,s;\tif(i == 1)&#123;     // 新结点插入在表头 \t\ts = (List)malloc(sizeof(struct LNode));\t\ts-&gt;Data = X;\t\ts-&gt;Next = L;\t\treturn s;     //插入的结点为头结点 \t&#125;\tp = FindKth(i-1,L);   // 找到第 i-1 个结点\tif(!p)&#123;   // 第 i-1 个结点不存在 \t\tprintf(\"结点错误\");\t\treturn NULL;\t&#125;else&#123;\t\ts = (List)malloc(sizeof(struct LNode));\t\ts-&gt;Data = X;\t\ts-&gt;Next = p-&gt;Next;   //将 s 的下一个结点指向 p 的下一个结点 \t\tp-&gt;Next = s;   // 将 p 的下一结点改为 s\t\treturn L;\t&#125;&#125;/* 删除1. 用 p 指向链表的第 i-1 个结点 2. 用 s 指向要被删除的的第 i 个结点3. p-&gt;Next = s-&gt;Next，p 指针指向 s 后面4. free(s)，释放空间 */List Delete(int i,List L)&#123;\tList p,s;\tif(i==1)&#123;   //如果要删除头结点 \t\ts = L;\t\tif(L)   // 如果不为空 \t\t\tL = L-&gt;Next;\t\telse\t\t\treturn NULL;\t\tfree(s);   // 释放被删除结点 \t\treturn L; \t&#125;\tp = FindKth(i-1,L);    // 查找第 i-1 个结点\tif(!p || !(p-&gt;Next))&#123;     // 第 i-1 个或第 i 个结点不存在 \t\tprintf(\"结点错误\");\t\treturn NULL;\t&#125;else&#123;\t\ts = p-&gt;Next;    // s 指向第 i 个结点 \t\tp-&gt;Next = s-&gt;Next;  //从链表删除 \t\tfree(s);  // 释放被删除结点 \t\treturn L;\t&#125;&#125;// 输出链表元素 void Print(List L)&#123;\tList t;\tint flag = 1;\tprintf(\"当前链表为：\");\tfor(t = L;t;t =t-&gt;Next)&#123;\t\tprintf(\"%d  \",t-&gt;Data);\t\tflag = 0;\t&#125;\tif(flag)\t\tprintf(\"NULL\");\tprintf(\"\\n\"); &#125;int main()&#123;\tL = MakeEmpty();\tPrint(L);\tL = Insert(11,1,L);\tL = Insert(25,1,L);\tL = Insert(33,2,L);\tL = Insert(77,3,L);\tPrint(L);\tprintf(\"当前链表长度为：%d\\n\",Length(L));\tprintf(\"此时链表中第二个结点的值是：%d\\n\",FindKth(2,L)-&gt;Data);\tprintf(\"查找22是否在该链表中：\");\tif(Find(22,L))\t\tprintf(\"是！\\n\");\telse\t\tprintf(\"否！\\n\");\tprintf(\"查找33是否在该链表中：\");\tif(Find(33,L))\t\tprintf(\"是！\\n\");\telse\t\tprintf(\"否！\\n\");\tL = Delete(1,L);\tL = Delete(3,L);\tprintf(\"----------删除后-----\\n\"); \tPrint(L);\treturn 0;&#125;\n1.4广义表与多重链表1.4.1广义表\n广义表是线性表的推广，广义表属于多重链表\n对于线性表而言，n个元素都是基本的单元素\n广义表中，这些元素不仅可以是单元素也可以是另一个广义表\n\n123456789typedef struct GNode *GList;struct Gnode&#123;  int Tag;/*标示域：区分是单元素还是广义表*/  union &#123;    ElementType Data;    GList SubList;  &#125;URegion;  GList Next;&#125;\n1.4.2多重链表\n多重链表中的结点的指针域会有多个\n但是包含两个指针域的链表并不一定是多重链表，比如双向链表\n广泛用途：树、图\n处理稀疏矩阵（十字链表）\n\n2.堆栈2.1什么是堆栈堆栈（Stack）：具有一定操作约束的线性表\n\n只在一端（栈顶，Top）做插入、删除\n插入数据：入栈（Push）\n删除数据：出栈（Pop）\n后入先出：Last In First Out（LIFO）\n\n2.2堆栈的抽象数据类型描述\n类型名称：堆栈（Stack）\n\n数据对象集：一个有 0 个或多个元素的有穷线性表\n\n操作集：长度为 MaxSize 的堆栈$ S ∈ Stack$，堆栈元素 $item ∈ ElementType$\n\n\n堆栈的基本操作主要有：\n\nStack CreateStack(int MaxSize)：生成空堆栈，其最大长度为 MaxSize\nint IsFull(Stack S,int MaxSize)：判断堆栈 S 是否已满\nvoid Push(Stack S,ElementType item)：将元素 item 压入堆栈\nint IsEmpty(Stack S)：判断堆栈 S 是否为空\nElementType Pop(Stack S)：删除并返回栈顶元素\n\n2.3存储实现2.3.1栈的顺序存储实现12345678910111213141516171819202122232425#defind MaxSize &lt;储存数据元素的最大个数&gt;typedef struct SNode *Stack;struct SNode&#123;  ElementType Data[MaxSize];  int Top;&#125;void Push(Stack PtrS, ElementType item)&#123;  if(Ptr-&gt;Top == MaxSize-1)&#123;    printf(\"堆栈满\");    return;  &#125;else&#123;    PtrS-&gt;Data[++(PtrS-&gt;Top)] = item;    return;  &#125;&#125;ElementType Pop(Stack PtrS)&#123;  if(PtrS-&gt;Top == -1)&#123;    printf(\"堆栈空\");    return ERROR;  &#125;else&#123;    return (PtrS-&gt;Data[(Ptr-&gt;Top)--])  &#125;&#125;\n\n请用一个数组实现两个堆栈，要求最大地利用数组空间，使数组只要有空间入栈操作就可以成功\n\n123456789101112131415161718192021222324252627282930313233#defind MaxSize &lt;储存数据元素的最大个数&gt;typedef struct SNode *Stack;struct SNode&#123;  ElementType Data[MaxSize];  int Top1 = -1;  int Top2 = MaxSize;&#125;S;void Push(struct DStack *PtrS, ElementType item, int Tag)&#123;  if(PtrS-&gt;Top2 - PtrS-&gt;Top1 == 1&#123;    printf(\"堆栈满\");  &#125;  if(Tag == 1)&#123;    PtrS-&gt;Data[++(PtrS-&gt;Top1)] = item;  &#125;else&#123;    PtrS-&gt;Data[--(PtrS-&gt;Top2)] = item;  &#125;&#125;     ElementType Pop(struct DStack *PtrS, int Tag)&#123;  if(Tag == 1)&#123;    if(PtrS-&gt;Top1 == -1)&#123;      printf(\"堆栈1空\");    &#125;else &#123;      return PtrS-&gt;Data[(PtrS-&gt;Top1)--];    &#125;  &#125;else&#123;    if(PtrS-&gt;Top2 == -MaxSize)&#123;      printf(\"堆栈2空\");    &#125;else &#123;      return PtrS-&gt;Data[(PtrS-&gt;Top2)++];  &#125;&#125;\n2.3.2栈的链式存储实现 栈的链式存储结构实际上就是一个单链表，叫做链栈。插入和删除操作只能在链栈的栈顶进行\n栈顶指针Top应该在链表的首部\n123456789101112131415161718192021222324252627282930313233343536373839typedef struct SNode *Stack;struct SNode&#123;  ElementType Data;  struct SNode *Next;&#125;;Stack CreateStack()&#123;  Stack S;  S = (Stack)malloc(sizeof(struct Snode));  S-&gt;Next = NULL;  return S;&#125;int IsEmpty(Stack S)&#123;  return (S-&gt;Next == NULL);&#125;void Push(ElementType item, Stack S)&#123;  struct SNode *TmpCell;  TmpCell = (struct SNode*)malloc(sizeof(struct SNode));  TmpCell-&gt;Element = item;  TmpCell-&gt;Next = s-&gt;Next;  S-&gt;Next = TmpCell;&#125;ElementType Pop(Stack S)&#123;  struct SNode *FirstCell;  ElementType TopElem;  if(IsEmpty(S))&#123;    printf(\"堆栈空\");    return NULL;  &#125;else&#123;    FirstCell = S-&gt;Next;    S-&gt;Next = FirstCell-&gt;Next;    TopElem = FirstCell-&gt;Element;    free(FirstCell);    return TopElem;  &#125;&#125;\n2.4堆栈的应用\n中缀表达式求值\n函数调用及递归实现\n深度优先搜索\n回溯算法\n","dateCreated":"2020-02-23T23:19:42+08:00","dateModified":"2020-02-24T20:44:05+08:00","datePublished":"2020-02-23T23:19:42+08:00","description":"最近在重新复习数据结构，笔记是根据中国MOOC上浙大的数据结构课程整理的不定期更新","headline":"浙大数据结构笔记","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"},"publisher":{"@type":"Organization","name":"Huang","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"url":"https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"}</script>
+    <meta name="description" content="最近在重新复习数据结构，笔记是根据中国MOOC上浙大的数据结构课程整理的不定期更新">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="浙大数据结构笔记">
+<meta property="og:url" content="https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Atypical Urban Planner">
+<meta property="og:description" content="最近在重新复习数据结构，笔记是根据中国MOOC上浙大的数据结构课程整理的不定期更新">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/Users/huangweijun/Library/Application%20Support/typora-user-images/image-20200217152312735.png">
+<meta property="article:published_time" content="2020-02-23T15:19:42.641Z">
+<meta property="article:modified_time" content="2020-02-24T12:44:05.808Z">
+<meta property="article:author" content="Huang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/Users/huangweijun/Library/Application%20Support/typora-user-images/image-20200217152312735.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-euk44zcjqhrvppkn624g2h7fubbudxk8ccbrtissy1xtslodta7nenpzvscm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/%20"
+            aria-label=""
+        >
+            Atypical Urban Planner
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="打开链接: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="首页"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">首页</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="分类"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">分类</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="标签"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">标签</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-archives"
+                            
+                            rel="noopener"
+                            title="归档"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">归档</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link open-algolia-search"
+                            href="#search"
+                            
+                            rel="noopener"
+                            title="搜索"
+                        >
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">搜索</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="关于"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">关于</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="http://stackoverflow.com/users"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Stack Overflow"
+                        >
+                        <i class="sidebar-button-icon fab fa-stack-overflow" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Stack Overflow</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://twitter.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Twitter"
+                        >
+                        <i class="sidebar-button-icon fab fa-twitter" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Twitter</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://facebook.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://plus.google.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Google Plus"
+                        >
+                        <i class="sidebar-button-icon fab fa-google-plus" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Google Plus</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/profile/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/mailto"
+                            
+                            rel="noopener"
+                            title="邮箱"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">邮箱</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            浙大数据结构笔记
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-02-23T23:19:42+08:00">
+	
+		    2月 23, 2020
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/cs/">cs</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <!-- excerpt -->
+<h1 id="table-of-contents">目录</h1><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#前言"><span class="toc-text">前言</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一、基本概念"><span class="toc-text">一、基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-什么是数据结构"><span class="toc-text">1.什么是数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1其他定义"><span class="toc-text">1.1其他定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2解决问题方法的效率"><span class="toc-text">1.2解决问题方法的效率</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#计算运行时间"><span class="toc-text">计算运行时间</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-最终定义"><span class="toc-text">1.3 最终定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-抽象数据类型（Abstract-Data-Type）"><span class="toc-text">1.4 抽象数据类型（Abstract Data Type）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-什么是算法"><span class="toc-text">2.什么是算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-定义"><span class="toc-text">2.1.定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-描述算法的手段"><span class="toc-text">2.2 描述算法的手段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-评价"><span class="toc-text">2.3 评价</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-复杂度的渐进表达"><span class="toc-text">2.4 复杂度的渐进表达</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-复杂度分析小窍门"><span class="toc-text">2.5 复杂度分析小窍门</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-最大子列集问题"><span class="toc-text">3. 最大子列集问题</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#算法一（暴力法）："><span class="toc-text">算法一（暴力法）：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#算法二（改进暴力法）："><span class="toc-text">算法二（改进暴力法）：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#算法三（分而治之）："><span class="toc-text">算法三（分而治之）：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#算法四（在线处理）："><span class="toc-text">算法四（在线处理）：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、线性结构"><span class="toc-text">二、线性结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-线性表及其实现"><span class="toc-text">1.线性表及其实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1什么是线性表"><span class="toc-text">1. 1什么是线性表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2线性表的抽象数据类型描述"><span class="toc-text">1.2线性表的抽象数据类型描述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3存储实现方法"><span class="toc-text">1.3存储实现方法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-3-1顺序存储实现"><span class="toc-text">1.3.1顺序存储实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-3-1链式存储实现"><span class="toc-text">1.3.1链式存储实现</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4广义表与多重链表"><span class="toc-text">1.4广义表与多重链表</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-4-1广义表"><span class="toc-text">1.4.1广义表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-4-2多重链表"><span class="toc-text">1.4.2多重链表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-堆栈"><span class="toc-text">2.堆栈</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1什么是堆栈"><span class="toc-text">2.1什么是堆栈</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2堆栈的抽象数据类型描述"><span class="toc-text">2.2堆栈的抽象数据类型描述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3存储实现"><span class="toc-text">2.3存储实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-1栈的顺序存储实现"><span class="toc-text">2.3.1栈的顺序存储实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-2栈的链式存储实现"><span class="toc-text">2.3.2栈的链式存储实现</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4堆栈的应用"><span class="toc-text">2.4堆栈的应用</span></a></li></ol></li></ol>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>系统学习数据结构</p>
+<p>课程地址：<a href="https://www.icourse163.org/learn/ZJU-93001" target="_blank" rel="noopener">https://www.icourse163.org/learn/ZJU-93001</a></p>
+<h2 id="一、基本概念"><a href="#一、基本概念" class="headerlink" title="一、基本概念"></a>一、基本概念</h2><h3 id="1-什么是数据结构"><a href="#1-什么是数据结构" class="headerlink" title="1.什么是数据结构"></a>1.什么是数据结构</h3><h4 id="1-1其他定义"><a href="#1-1其他定义" class="headerlink" title="1.1其他定义"></a>1.1其他定义</h4><ul>
+<li>数据结构是数据对象，以及存在于该对象的实例和组成实例的数据元素之间的各种联系。这些联系可以通过定义相关的函数来给出。 ——Sartaj Sahni 《数据结构、算法与应用》</li>
+<li>数据结构是 ADT（Abstract Data Type，数据抽象类型）的物理实现。 ——Clifford A.Shaffer 《数据结构与算法分析》</li>
+<li>数据结构（data structure）是计算机中存储、组织数据的方式。通常情况下，精心选择的数据结构可以带来最优效率的算法。 ——中文维基百科</li>
+</ul>
+<h4 id="1-2解决问题方法的效率"><a href="#1-2解决问题方法的效率" class="headerlink" title="1.2解决问题方法的效率"></a>1.2解决问题方法的效率</h4><ul>
+<li><p>跟数组的组织方式有关</p>
+</li>
+<li><p>跟空间的利用效率有关</p>
+</li>
+<li><p>跟算法的巧妙程度有关</p>
+<h5 id="计算运行时间"><a href="#计算运行时间" class="headerlink" title="计算运行时间"></a>计算运行时间</h5><p>Q:函数单次运行时间过短？</p>
+<p>A:让被测函数重复运行多次，取平均时间</p>
+</li>
+</ul>
+<p>计算被测函数运行时间模版</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="keyword">clock_t</span> start,<span class="built_in">end</span>;</span><br><span class="line"><span class="keyword">double</span> duration;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">  start = clock();</span><br><span class="line">  MyFunction();</span><br><span class="line">  <span class="built_in">stop</span> = clock;</span><br><span class="line">  duration = (<span class="keyword">double</span>(<span class="built_in">stop</span> - start)/CLK_TCK);</span><br><span class="line">  <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="1-3-最终定义"><a href="#1-3-最终定义" class="headerlink" title="1.3 最终定义"></a>1.3 最终定义</h4><ul>
+<li>数据对象在计算机中的组织方式<ul>
+<li>逻辑结构</li>
+<li>物理存储结构</li>
+</ul>
+</li>
+<li>数据对象必定与一系列加在其上的操作相关联</li>
+<li>完成这些操作所用的方法就是算法</li>
+</ul>
+<h4 id="1-4-抽象数据类型（Abstract-Data-Type）"><a href="#1-4-抽象数据类型（Abstract-Data-Type）" class="headerlink" title="1.4 抽象数据类型（Abstract Data Type）"></a>1.4 抽象数据类型（Abstract Data Type）</h4><ul>
+<li><p>数据类型</p>
+<ul>
+<li>数据对象集</li>
+<li>数据集合相关联的操作集</li>
+</ul>
+</li>
+<li><p>抽象：描述数据类型的方法不依赖于具体实现</p>
+<ul>
+<li>与存放数据的机器无关</li>
+<li>与数据存储的物理结构无关</li>
+<li>与实现操作的算法和编程语言均无关</li>
+</ul>
+<p>抽象不关心具体实现细节，关心的是宏观程度上把握程序的整体架构</p>
+</li>
+</ul>
+<h3 id="2-什么是算法"><a href="#2-什么是算法" class="headerlink" title="2.什么是算法"></a>2.什么是算法</h3><h4 id="2-1-定义"><a href="#2-1-定义" class="headerlink" title="2.1.定义"></a>2.1.定义</h4><ul>
+<li>一个有限指令集</li>
+<li>接受一些输入</li>
+<li><p>一定在有限步骤之后终止</p>
+</li>
+<li><p>每一条指令必须</p>
+<ul>
+<li>有充分明确的目标，不可以有歧义</li>
+<li>计算机能处理范围内</li>
+<li>描述应不依赖于任何一种计算机语言以及具体的实现手段</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-2-描述算法的手段"><a href="#2-2-描述算法的手段" class="headerlink" title="2.2 描述算法的手段"></a>2.2 描述算法的手段</h4><ol>
+<li><p>空间复杂度 S(n)</p>
+<p>根据算法写成的程序在执行时<strong>占用存储空间的长度</strong></p>
+</li>
+<li><p>时间复杂度 T(n)</p>
+<p>根据算法写成的程序在执行时<strong>耗费的时间的长度</strong></p>
+</li>
+</ol>
+<p>递归函数每递归一次，都需要将parent process的寄存器信息压入栈中<img src="/Users/huangweijun/Library/Application Support/typora-user-images/image-20200217152312735.png" alt="image-20200217152312735"></p>
+<h4 id="2-3-评价"><a href="#2-3-评价" class="headerlink" title="2.3 评价"></a>2.3 评价</h4><p>在分析一般算法的效率时，常常关注</p>
+<ol>
+<li><p>最坏情况复杂度 $ T_{worst}(n) $</p>
+</li>
+<li><p>平均情况复杂度 $T_{avg}(n) $</p>
+</li>
+</ol>
+<script type="math/tex; mode=display">
+T_{arg}(n) \le T_{worst}(n)</script><p>一般情况下更多关注的是最坏情况复杂度</p>
+<h4 id="2-4-复杂度的渐进表达"><a href="#2-4-复杂度的渐进表达" class="headerlink" title="2.4 复杂度的渐进表达"></a>2.4 复杂度的渐进表达</h4><ul>
+<li>$T(n)=O(f(n))$ 表示存在常数$C&gt;0，n_0&gt;0 $使得当 $n \ge n_0$时有$T(n)≤C⋅f(n)$, 即 $O(f(n))$表示 $f(n)$是 $T(n) $的某种上界</li>
+<li>$T(n)=Ω(g(n))$ 表示存在常数$C&gt;0，n_0&gt;0 $使得当 $n \ge n_0$时有$T(n)≤C⋅g(n)$, 即 $Ω(g(n))$表示 $f(n)$是 $T(n) $的某种下界</li>
+<li>$T(n)=θ(h(n))$ 表示存在常数$C&gt;0，n_0&gt;0 $使得当 $n \ge n_0$时有$T(n)≤C⋅h(n)$, 即 $θ(f(n))$表示 $f(n)$是 $T(n) $的上界也是下界</li>
+</ul>
+<h4 id="2-5-复杂度分析小窍门"><a href="#2-5-复杂度分析小窍门" class="headerlink" title="2.5 复杂度分析小窍门"></a>2.5 复杂度分析小窍门</h4><ol>
+<li>若两段算法分别有复杂度 $T_1(n)=O(f1(n))$和$T_2(n) = O(f_2(n))$，则</li>
+</ol>
+<ul>
+<li>$T_1(n)+T_2(n)=max(O(f_1(n)),O(f_2(n)))$</li>
+<li>$T_1(n)\times T_2(n)=O(f_1(n))\times O(f_2(n))$</li>
+</ul>
+<ol>
+<li>若$T(n)$是关于$n$的$k$阶多项式，那么$T(n)=\theta(n^k)$</li>
+<li><p>一个 for 循环的时间复杂度等于循环次数乘以循环体代码的复杂度</p>
+</li>
+<li><p>if-else 结构的复杂度取决于 if 的条件判断复杂度和两个分枝部分的复杂度，总体复杂度取三者中最大</p>
+</li>
+</ol>
+<h3 id="3-最大子列集问题"><a href="#3-最大子列集问题" class="headerlink" title="3. 最大子列集问题"></a>3. 最大子列集问题</h3><p>题目：给定N个整数的序列$\{A_1,A_2,A_3,…,A_N\}$求函数$f(i,j)=max\{0,\sum_{k=0}^j A_k \}$</p>
+<h5 id="算法一（暴力法）："><a href="#算法一（暴力法）：" class="headerlink" title="算法一（暴力法）："></a>算法一（暴力法）：</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">MaxSubseqSum1</span><span class="params">(<span class="keyword">int</span> A[],<span class="keyword">int</span> N)</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> ThisSum, MaxSum = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">int</span> i, j, k;</span><br><span class="line">  <span class="keyword">for</span>(i=<span class="number">0</span>, i&lt;N; i++)&#123;<span class="comment">/*子列左端*/</span></span><br><span class="line">    <span class="keyword">for</span>(j=i; j&lt;N; j++)&#123;<span class="comment">/*子列右端*/</span></span><br><span class="line">      ThisSum = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">for</span>(k=i; k&lt;=j; k++)</span><br><span class="line">        ThisSum += A[k];</span><br><span class="line">      <span class="keyword">if</span>(ThisSum &gt; MaxSum)</span><br><span class="line">        MaxSum = ThisSum;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> MaxSum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度：$O(N^3)$</p>
+<p>改进方法：每次计算ThisSum是不必重新计算，只需与后续元素直接相加</p>
+<h5 id="算法二（改进暴力法）："><a href="#算法二（改进暴力法）：" class="headerlink" title="算法二（改进暴力法）："></a>算法二（改进暴力法）：</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">MaxSubseqSum2</span><span class="params">(<span class="keyword">int</span> A[],<span class="keyword">int</span> N)</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> ThisSum, MaxSum = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">int</span> i, j, k;</span><br><span class="line">  <span class="keyword">for</span>(i=<span class="number">0</span>, i&lt;N; i++)&#123;<span class="comment">/*子列左端*/</span></span><br><span class="line">    <span class="keyword">for</span>(j=i; j&lt;N; j++)&#123;<span class="comment">/*子列右端*/</span></span><br><span class="line">      ThisSum += A[j];</span><br><span class="line">      <span class="keyword">if</span>(ThisSum &gt; MaxSum)</span><br><span class="line">        MaxSum = ThisSum;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> MaxSum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度：$O(N^2)$</p>
+<h5 id="算法三（分而治之）："><a href="#算法三（分而治之）：" class="headerlink" title="算法三（分而治之）："></a>算法三（分而治之）：</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">int</span> <span class="title">Max3</span><span class="params">( <span class="keyword">int</span> A, <span class="keyword">int</span> B, <span class="keyword">int</span> C )</span></span></span><br><span class="line"><span class="function"></span>&#123; <span class="comment">/* 返回3个整数中的最大值 */</span></span><br><span class="line">    <span class="keyword">return</span> A &gt; B ? A &gt; C ? A : C : B &gt; C ? B : C;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">DivideAndConquer</span><span class="params">( <span class="keyword">int</span> List[], <span class="keyword">int</span> left, <span class="keyword">int</span> right )</span></span></span><br><span class="line"><span class="function"></span>&#123; <span class="comment">/* 分治法求List[left]到List[right]的最大子列和 */</span></span><br><span class="line">    <span class="keyword">int</span> MaxLeftSum, MaxRightSum; <span class="comment">/* 存放左右子问题的解 */</span></span><br><span class="line">    <span class="keyword">int</span> MaxLeftBorderSum, MaxRightBorderSum; <span class="comment">/*存放跨分界线的结果*/</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">int</span> LeftBorderSum, RightBorderSum;</span><br><span class="line">    <span class="keyword">int</span> center, i;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>( left == right )  &#123; <span class="comment">/* 递归的终止条件，子列只有1个数字 */</span></span><br><span class="line">        <span class="keyword">if</span>( List[left] &gt; <span class="number">0</span> )  <span class="keyword">return</span> List[left];</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/* 下面是"分"的过程 */</span></span><br><span class="line">    center = ( left + right ) / <span class="number">2</span>; <span class="comment">/* 找到中分点 */</span></span><br><span class="line">    <span class="comment">/* 递归求得两边子列的最大和 */</span></span><br><span class="line">    MaxLeftSum = DivideAndConquer( List, left, center );</span><br><span class="line">    MaxRightSum = DivideAndConquer( List, center+<span class="number">1</span>, right );</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/* 下面求跨分界线的最大子列和 */</span></span><br><span class="line">    MaxLeftBorderSum = <span class="number">0</span>; LeftBorderSum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>( i=center; i&gt;=left; i-- ) &#123; <span class="comment">/* 从中线向左扫描 */</span></span><br><span class="line">        LeftBorderSum += List[i];</span><br><span class="line">        <span class="keyword">if</span>( LeftBorderSum &gt; MaxLeftBorderSum )</span><br><span class="line">            MaxLeftBorderSum = LeftBorderSum;</span><br><span class="line">    &#125; <span class="comment">/* 左边扫描结束 */</span></span><br><span class="line"> </span><br><span class="line">    MaxRightBorderSum = <span class="number">0</span>; RightBorderSum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>( i=center+<span class="number">1</span>; i&lt;=right; i++ ) &#123; <span class="comment">/* 从中线向右扫描 */</span></span><br><span class="line">        RightBorderSum += List[i];</span><br><span class="line">        <span class="keyword">if</span>( RightBorderSum &gt; MaxRightBorderSum )</span><br><span class="line">            MaxRightBorderSum = RightBorderSum;</span><br><span class="line">    &#125; <span class="comment">/* 右边扫描结束 */</span></span><br><span class="line"> </span><br><span class="line">    <span class="comment">/* 下面返回"治"的结果 */</span></span><br><span class="line">    <span class="keyword">return</span> Max3( MaxLeftSum, MaxRightSum, MaxLeftBorderSum + MaxRightBorderSum );</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">MaxSubseqSum3</span><span class="params">( <span class="keyword">int</span> List[], <span class="keyword">int</span> N )</span></span></span><br><span class="line"><span class="function"></span>&#123; <span class="comment">/* 保持与前2种算法相同的函数接口 */</span></span><br><span class="line">    <span class="keyword">return</span> DivideAndConquer( List, <span class="number">0</span>, N<span class="number">-1</span> );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度：$O(NlogN)$</p>
+<script type="math/tex; mode=display">
+T(N) = 2T(N/2)+cN, \qquad T(1)=O(1)\\
+=2[2T(N/2^2)+c N/2]+cN\\
+其中N/2^k=1</script><h5 id="算法四（在线处理）："><a href="#算法四（在线处理）：" class="headerlink" title="算法四（在线处理）："></a>算法四（在线处理）：</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">MaxSubseqSum4</span><span class="params">(<span class="keyword">int</span> A[],<span class="keyword">int</span> N)</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> ThisSum, MaxSum = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">int</span> i, j, k;</span><br><span class="line">  <span class="keyword">for</span>(i=<span class="number">0</span>, i&lt;N; i++)&#123;</span><br><span class="line">    ThisSum += A[i];<span class="comment">/*向右累加*/</span></span><br><span class="line">    <span class="keyword">if</span>(ThisSum &gt; MaxSum)</span><br><span class="line">      MaxSum = ThisSum;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(ThisSum&lt;<span class="number">0</span>)<span class="comment">/*当前子列和为负*/</span></span><br><span class="line">      ThisSum = <span class="number">0</span>;<span class="comment">/*则不可能使后面的部分和增大，抛弃*/</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> MaxSum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度：$O(N)$</p>
+<h2 id="二、线性结构"><a href="#二、线性结构" class="headerlink" title="二、线性结构"></a>二、线性结构</h2><h3 id="1-线性表及其实现"><a href="#1-线性表及其实现" class="headerlink" title="1.线性表及其实现"></a>1.线性表及其实现</h3><h4 id="1-1什么是线性表"><a href="#1-1什么是线性表" class="headerlink" title="1. 1什么是线性表"></a>1. 1什么是线性表</h4><p> “线性表”：由同类型数据元素构成有序序列的线性结构</p>
+<ul>
+<li>表中元素个数称为线性表的<strong>长度</strong></li>
+<li>线性表没有元素时，称为<strong>空表</strong></li>
+<li>表起始位置称为<strong>表头</strong>，表结束位置称<strong>表尾</strong></li>
+</ul>
+<h4 id="1-2线性表的抽象数据类型描述"><a href="#1-2线性表的抽象数据类型描述" class="headerlink" title="1.2线性表的抽象数据类型描述"></a>1.2线性表的抽象数据类型描述</h4><ul>
+<li><p>类型名称：线性表（List）</p>
+</li>
+<li><p>数据对象集：线性表是 $n(≥0)$个元素构成的有序序列$(a_1,a_2,…,a_n)$</p>
+</li>
+<li><p>操作集：线性表 $L\in List$ ，整数 i 表示位置，元素 $X\in ElementType$</p>
+</li>
+<li><p>线性表基本操作主要有：</p>
+<ul>
+<li><code>List MakeEmpty()</code>： 初始化一个空线性表 L</li>
+<li><code>ElementType FindKth(int K,List L)</code>：根据位序 K，返回相应元素</li>
+<li><code>int Find(ElementType X,List L)</code>：在线性表 L 中查找 X 的第一次出现位置</li>
+<li><code>void Insert(ElementType X,int i,List L)</code>：在位序 i 前插入一个新元素 X</li>
+<li><code>void Delete(int i,List L)</code>：删除指定位序 i 的元素</li>
+<li><code>int Length(List L)</code>：返回线性表 L 的长度 n</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-3存储实现方法"><a href="#1-3存储实现方法" class="headerlink" title="1.3存储实现方法"></a>1.3存储实现方法</h4><h5 id="1-3-1顺序存储实现"><a href="#1-3-1顺序存储实现" class="headerlink" title="1.3.1顺序存储实现"></a>1.3.1顺序存储实现</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">typedf <span class="class"><span class="keyword">struct</span> <span class="title">LNode</span> *<span class="title">List</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">LNode</span>&#123;</span></span><br><span class="line">  ElementType Data[MAXSIZE];</span><br><span class="line">  <span class="keyword">int</span> Last;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">LNode</span> <span class="title">L</span>;</span></span><br><span class="line">List PtrL;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*initail*/</span></span><br><span class="line"><span class="function">List <span class="title">MakeEmpty</span><span class="params">()</span></span>&#123;</span><br><span class="line">  List PtrL;</span><br><span class="line">  PtrL = (List)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(struct LNode));</span><br><span class="line">  PtrL-&gt;Last = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> PtrL;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Find element*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">Find</span><span class="params">(ElementType X,List PtrL)</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span>(i &lt;= PtrL-&gt;Last &amp;&amp; PtrL-&gt;Data[i]!=X)i++;</span><br><span class="line">  <span class="keyword">if</span>(i &gt; PtrL-&gt;Last) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*insert element*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Insert</span><span class="params">(ElementType X,<span class="keyword">int</span> i,List PtrL)</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> j;</span><br><span class="line">  <span class="keyword">if</span>(PtrL-&gt;Last == MAXSIZE<span class="number">-1</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Full"</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span>(i&lt;<span class="number">1</span> || i&gt;PtrL-&gt;Last+<span class="number">2</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"unfair position"</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span>(j=PtrL-&gt;Last; j&gt;=i;j--)&#123;</span><br><span class="line">    PtrL-&gt;Data[j+<span class="number">1</span>] = PtrL-&gt;Data[j];</span><br><span class="line">  &#125;</span><br><span class="line">  PtrL-&gt;Data[i<span class="number">-1</span>] = X;</span><br><span class="line">  PtrL-&gt;Last++;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*平均移动次数为n/2*/</span></span><br><span class="line"><span class="comment">/*平均时间性能是O（n）*/</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Delete</span><span class="params">(<span class="keyword">int</span> i,List PtrL)</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> j;</span><br><span class="line">  <span class="keyword">if</span>(i&lt;<span class="number">1</span> || i&gt;PtrL-&gt;Last+<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"不存在第%d个元素"</span>,i);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span>(j=i; j&lt;=PtrL-&gt;Last; j++)&#123;</span><br><span class="line">    PtrL-&gt;Data[j<span class="number">-1</span>] = PtrL-&gt;Data[j];</span><br><span class="line">  &#125;</span><br><span class="line">  PtrL-&gt;Last--;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*平均移动次数为(n-1)/2*/</span></span><br><span class="line"><span class="comment">/*平均时间性能是O（n）*/</span></span><br></pre></td></tr></table></figure>
+<h5 id="1-3-1链式存储实现"><a href="#1-3-1链式存储实现" class="headerlink" title="1.3.1链式存储实现"></a>1.3.1链式存储实现</h5><p> 不要求逻辑上相邻的两个元素物理上也相邻，通过”链”建立起数据之间的逻辑关系</p>
+<ul>
+<li>插入、删除不需要移动数据元素，只需要修改”链”</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> ElementType; <span class="comment">// ElementType 可定义为任意类型</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">LNode</span> *<span class="title">List</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">LNode</span>&#123;</span></span><br><span class="line">	ElementType Data;   <span class="comment">//数据域 </span></span><br><span class="line">	List Next;   <span class="comment">// 下一个链表的地址 </span></span><br><span class="line">&#125;; </span><br><span class="line">List L;</span><br><span class="line"></span><br><span class="line"><span class="function">List <span class="title">MakeEmpty</span><span class="params">()</span></span>; <span class="comment">//初始化链表 </span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">Length</span><span class="params">(List L)</span></span>;  <span class="comment">// 以遍历链表的方法求链表长度 </span></span><br><span class="line"><span class="function">List <span class="title">FindKth</span><span class="params">(<span class="keyword">int</span> K,List L)</span></span>;  <span class="comment">// 按序号查找 </span></span><br><span class="line"><span class="function">List <span class="title">Find</span><span class="params">(ElementType X,List L)</span></span>;  <span class="comment">// 按值查找 </span></span><br><span class="line"><span class="function">List <span class="title">Insert</span><span class="params">(ElementType X,<span class="keyword">int</span> i,List L)</span></span>;  <span class="comment">//将 X 插入到第 i-1(i&gt;0) 个结点之后 </span></span><br><span class="line"><span class="function">List <span class="title">Delete</span><span class="params">(<span class="keyword">int</span> i,List L)</span></span>; <span class="comment">// 删除第 i(i&gt;0) 个结点 </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Print</span><span class="params">(List L)</span></span>; <span class="comment">// 输出链表元素 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化链表 </span></span><br><span class="line"><span class="function">List <span class="title">MakeEmpty</span><span class="params">()</span></span>&#123;</span><br><span class="line">	List L = (List)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(struct LNode));</span><br><span class="line">	L = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">return</span> L;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//求表长 </span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">Length</span><span class="params">(List L)</span></span>&#123;</span><br><span class="line">	List p = L;</span><br><span class="line">	<span class="keyword">int</span> len=<span class="number">0</span>;</span><br><span class="line">	<span class="keyword">while</span>(p)&#123;  <span class="comment">// 当 p 不为空 </span></span><br><span class="line">		p = p-&gt;Next;</span><br><span class="line">		len++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> len;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 按序查找 </span></span><br><span class="line"><span class="function">List <span class="title">FindKth</span><span class="params">(<span class="keyword">int</span> K,List L)</span></span>&#123;</span><br><span class="line">	List p = L;</span><br><span class="line">	<span class="keyword">int</span> i = <span class="number">1</span>;  <span class="comment">//从 1 开始 </span></span><br><span class="line">	<span class="keyword">while</span>(p &amp;&amp; i&lt;K)&#123;</span><br><span class="line">		p = p-&gt;Next;</span><br><span class="line">		i++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(i == K)    <span class="comment">// 找到了 </span></span><br><span class="line">		<span class="keyword">return</span> p;</span><br><span class="line">	<span class="keyword">else</span>    <span class="comment">// 未找到 </span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 按值查找  </span></span><br><span class="line"><span class="function">List <span class="title">Find</span><span class="params">(ElementType X,List L)</span></span>&#123;</span><br><span class="line">	List p = L;</span><br><span class="line">	<span class="keyword">while</span>(p &amp;&amp; p-&gt;Data!=X)</span><br><span class="line">		p = p-&gt;Next;</span><br><span class="line">	<span class="comment">// 找到了，返回 p</span></span><br><span class="line">	<span class="comment">// 未找到，返回 NULL，此时 p 等于 NULL </span></span><br><span class="line">	<span class="keyword">return</span> p;   </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">/* 插入</span></span><br><span class="line"><span class="comment">1. 用 s 指向一个新的结点</span></span><br><span class="line"><span class="comment">2. 用 p 指向链表的第 i-1 个结点 </span></span><br><span class="line"><span class="comment">3. s-&gt;Next = p-&gt;Next，将 s 的下一个结点指向 p 的下一个结点 </span></span><br><span class="line"><span class="comment">4. p-&gt;Next = s，将 p 的下一结点改为 s   */</span></span><br><span class="line"><span class="function">List <span class="title">Insert</span><span class="params">(ElementType X,<span class="keyword">int</span> i,List L)</span></span>&#123;</span><br><span class="line">	List p,s;</span><br><span class="line">	<span class="keyword">if</span>(i == <span class="number">1</span>)&#123;     <span class="comment">// 新结点插入在表头 </span></span><br><span class="line">		s = (List)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(struct LNode));</span><br><span class="line">		s-&gt;Data = X;</span><br><span class="line">		s-&gt;Next = L;</span><br><span class="line">		<span class="keyword">return</span> s;     <span class="comment">//插入的结点为头结点 </span></span><br><span class="line">	&#125;</span><br><span class="line">	p = FindKth(i<span class="number">-1</span>,L);   <span class="comment">// 找到第 i-1 个结点</span></span><br><span class="line">	<span class="keyword">if</span>(!p)&#123;   <span class="comment">// 第 i-1 个结点不存在 </span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"结点错误"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">		s = (List)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(struct LNode));</span><br><span class="line">		s-&gt;Data = X;</span><br><span class="line">		s-&gt;Next = p-&gt;Next;   <span class="comment">//将 s 的下一个结点指向 p 的下一个结点 </span></span><br><span class="line">		p-&gt;Next = s;   <span class="comment">// 将 p 的下一结点改为 s</span></span><br><span class="line">		<span class="keyword">return</span> L;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 删除</span></span><br><span class="line"><span class="comment">1. 用 p 指向链表的第 i-1 个结点 </span></span><br><span class="line"><span class="comment">2. 用 s 指向要被删除的的第 i 个结点</span></span><br><span class="line"><span class="comment">3. p-&gt;Next = s-&gt;Next，p 指针指向 s 后面</span></span><br><span class="line"><span class="comment">4. free(s)，释放空间 </span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function">List <span class="title">Delete</span><span class="params">(<span class="keyword">int</span> i,List L)</span></span>&#123;</span><br><span class="line">	List p,s;</span><br><span class="line">	<span class="keyword">if</span>(i==<span class="number">1</span>)&#123;   <span class="comment">//如果要删除头结点 </span></span><br><span class="line">		s = L;</span><br><span class="line">		<span class="keyword">if</span>(L)   <span class="comment">// 如果不为空 </span></span><br><span class="line">			L = L-&gt;Next;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">		<span class="built_in">free</span>(s);   <span class="comment">// 释放被删除结点 </span></span><br><span class="line">		<span class="keyword">return</span> L; </span><br><span class="line">	&#125;</span><br><span class="line">	p = FindKth(i<span class="number">-1</span>,L);    <span class="comment">// 查找第 i-1 个结点</span></span><br><span class="line">	<span class="keyword">if</span>(!p || !(p-&gt;Next))&#123;     <span class="comment">// 第 i-1 个或第 i 个结点不存在 </span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"结点错误"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">		s = p-&gt;Next;    <span class="comment">// s 指向第 i 个结点 </span></span><br><span class="line">		p-&gt;Next = s-&gt;Next;  <span class="comment">//从链表删除 </span></span><br><span class="line">		<span class="built_in">free</span>(s);  <span class="comment">// 释放被删除结点 </span></span><br><span class="line">		<span class="keyword">return</span> L;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出链表元素 </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Print</span><span class="params">(List L)</span></span>&#123;</span><br><span class="line">	List t;</span><br><span class="line">	<span class="keyword">int</span> flag = <span class="number">1</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"当前链表为："</span>);</span><br><span class="line">	<span class="keyword">for</span>(t = L;t;t =t-&gt;Next)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"%d  "</span>,t-&gt;Data);</span><br><span class="line">		flag = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(flag)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"NULL"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\n"</span>); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	L = MakeEmpty();</span><br><span class="line">	Print(L);</span><br><span class="line">	L = Insert(<span class="number">11</span>,<span class="number">1</span>,L);</span><br><span class="line">	L = Insert(<span class="number">25</span>,<span class="number">1</span>,L);</span><br><span class="line">	L = Insert(<span class="number">33</span>,<span class="number">2</span>,L);</span><br><span class="line">	L = Insert(<span class="number">77</span>,<span class="number">3</span>,L);</span><br><span class="line">	Print(L);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"当前链表长度为：%d\n"</span>,Length(L));</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"此时链表中第二个结点的值是：%d\n"</span>,FindKth(<span class="number">2</span>,L)-&gt;Data);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"查找22是否在该链表中："</span>);</span><br><span class="line">	<span class="keyword">if</span>(Find(<span class="number">22</span>,L))</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"是！\n"</span>);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"否！\n"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"查找33是否在该链表中："</span>);</span><br><span class="line">	<span class="keyword">if</span>(Find(<span class="number">33</span>,L))</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"是！\n"</span>);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"否！\n"</span>);</span><br><span class="line">	L = Delete(<span class="number">1</span>,L);</span><br><span class="line">	L = Delete(<span class="number">3</span>,L);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"----------删除后-----\n"</span>); </span><br><span class="line">	Print(L);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="1-4广义表与多重链表"><a href="#1-4广义表与多重链表" class="headerlink" title="1.4广义表与多重链表"></a>1.4广义表与多重链表</h4><h5 id="1-4-1广义表"><a href="#1-4-1广义表" class="headerlink" title="1.4.1广义表"></a>1.4.1广义表</h5><ul>
+<li>广义表是线性表的推广，广义表属于多重链表</li>
+<li>对于线性表而言，n个元素都是基本的单元素</li>
+<li>广义表中，这些元素不仅可以是单元素也可以是另一个广义表</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">GNode</span> *<span class="title">GList</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Gnode</span>&#123;</span></span><br><span class="line">  <span class="keyword">int</span> Tag;<span class="comment">/*标示域：区分是单元素还是广义表*/</span></span><br><span class="line">  <span class="keyword">union</span> &#123;</span><br><span class="line">    ElementType Data;</span><br><span class="line">    GList SubList;</span><br><span class="line">  &#125;URegion;</span><br><span class="line">  GList Next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-4-2多重链表"><a href="#1-4-2多重链表" class="headerlink" title="1.4.2多重链表"></a>1.4.2多重链表</h5><ul>
+<li>多重链表中的结点的指针域会有多个</li>
+<li>但是包含两个指针域的链表并不一定是多重链表，比如<code>双向链表</code></li>
+<li>广泛用途：树、图</li>
+<li>处理稀疏矩阵（十字链表）</li>
+</ul>
+<h3 id="2-堆栈"><a href="#2-堆栈" class="headerlink" title="2.堆栈"></a>2.堆栈</h3><h4 id="2-1什么是堆栈"><a href="#2-1什么是堆栈" class="headerlink" title="2.1什么是堆栈"></a>2.1什么是堆栈</h4><p>堆栈（Stack）：具有一定操作约束的线性表</p>
+<ul>
+<li>只在一端（栈顶，Top）做插入、删除</li>
+<li>插入数据：入栈（Push）</li>
+<li>删除数据：出栈（Pop）</li>
+<li>后入先出：Last In First Out（LIFO）</li>
+</ul>
+<h4 id="2-2堆栈的抽象数据类型描述"><a href="#2-2堆栈的抽象数据类型描述" class="headerlink" title="2.2堆栈的抽象数据类型描述"></a>2.2堆栈的抽象数据类型描述</h4><ul>
+<li><p>类型名称：堆栈（Stack）</p>
+</li>
+<li><p>数据对象集：一个有 0 个或多个元素的有穷线性表</p>
+</li>
+<li><p>操作集：长度为 MaxSize 的堆栈$ S ∈ Stack$，堆栈元素 $item ∈ ElementType$</p>
+</li>
+</ul>
+<p>堆栈的基本操作主要有：</p>
+<ul>
+<li><code>Stack CreateStack(int MaxSize)</code>：生成空堆栈，其最大长度为 MaxSize</li>
+<li><code>int IsFull(Stack S,int MaxSize)</code>：判断堆栈 S 是否已满</li>
+<li><code>void Push(Stack S,ElementType item)</code>：将元素 item 压入堆栈</li>
+<li><code>int IsEmpty(Stack S)</code>：判断堆栈 S 是否为空</li>
+<li><code>ElementType Pop(Stack S)</code>：删除并返回栈顶元素</li>
+</ul>
+<h4 id="2-3存储实现"><a href="#2-3存储实现" class="headerlink" title="2.3存储实现"></a>2.3存储实现</h4><h5 id="2-3-1栈的顺序存储实现"><a href="#2-3-1栈的顺序存储实现" class="headerlink" title="2.3.1栈的顺序存储实现"></a>2.3.1栈的顺序存储实现</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#defind MaxSize <span class="meta-string">&lt;储存数据元素的最大个数&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">SNode</span> *<span class="title">Stack</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SNode</span>&#123;</span></span><br><span class="line">  ElementType Data[MaxSize];</span><br><span class="line">  <span class="keyword">int</span> Top;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Push</span><span class="params">(Stack PtrS, ElementType item)</span></span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(Ptr-&gt;Top == MaxSize<span class="number">-1</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"堆栈满"</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    PtrS-&gt;Data[++(PtrS-&gt;Top)] = item;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">ElementType <span class="title">Pop</span><span class="params">(Stack PtrS)</span></span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(PtrS-&gt;Top == <span class="number">-1</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"堆栈空"</span>);</span><br><span class="line">    <span class="keyword">return</span> ERROR;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (PtrS-&gt;Data[(Ptr-&gt;Top)--])</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请用一个数组实现两个堆栈，要求最大地利用数组空间，使数组只要有空间入栈操作就可以成功</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#defind MaxSize <span class="meta-string">&lt;储存数据元素的最大个数&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">SNode</span> *<span class="title">Stack</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SNode</span>&#123;</span></span><br><span class="line">  ElementType Data[MaxSize];</span><br><span class="line">  <span class="keyword">int</span> Top1 = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">int</span> Top2 = MaxSize;</span><br><span class="line">&#125;S;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Push</span><span class="params">(struct DStack *PtrS, ElementType item, <span class="keyword">int</span> Tag)</span></span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(PtrS-&gt;Top2 - PtrS-&gt;Top1 == <span class="number">1</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"堆栈满"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span>(Tag == <span class="number">1</span>)&#123;</span><br><span class="line">    PtrS-&gt;Data[++(PtrS-&gt;Top1)] = item;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    PtrS-&gt;Data[--(PtrS-&gt;Top2)] = item;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;     </span><br><span class="line"></span><br><span class="line">ElementType Pop(struct DStack *PtrS, <span class="keyword">int</span> Tag)&#123;</span><br><span class="line">  <span class="keyword">if</span>(Tag == <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">if</span>(PtrS-&gt;Top1 == <span class="number">-1</span>)&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"堆栈1空"</span>);</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> PtrS-&gt;Data[(PtrS-&gt;Top1)--];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(PtrS-&gt;Top2 == -MaxSize)&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"堆栈2空"</span>);</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> PtrS-&gt;Data[(PtrS-&gt;Top2)++];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="2-3-2栈的链式存储实现"><a href="#2-3-2栈的链式存储实现" class="headerlink" title="2.3.2栈的链式存储实现"></a>2.3.2栈的链式存储实现</h5><p> 栈的链式存储结构实际上就是一个单链表，叫做链栈。插入和删除操作只能在链栈的栈顶进行</p>
+<p>栈顶指针Top应该在链表的首部</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">SNode</span> *<span class="title">Stack</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SNode</span>&#123;</span></span><br><span class="line">  ElementType Data;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">SNode</span> *<span class="title">Next</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Stack <span class="title">CreateStack</span><span class="params">()</span></span>&#123;</span><br><span class="line">  Stack S;</span><br><span class="line">  S = (Stack)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(struct Snode));</span><br><span class="line">  S-&gt;Next = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="keyword">return</span> S;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">IsEmpty</span><span class="params">(Stack S)</span></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> (S-&gt;Next == <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Push</span><span class="params">(ElementType item, Stack S)</span></span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">SNode</span> *<span class="title">TmpCell</span>;</span></span><br><span class="line">  TmpCell = (struct SNode*)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(struct SNode));</span><br><span class="line">  TmpCell-&gt;Element = item;</span><br><span class="line">  TmpCell-&gt;Next = s-&gt;Next;</span><br><span class="line">  S-&gt;Next = TmpCell;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">ElementType <span class="title">Pop</span><span class="params">(Stack S)</span></span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">SNode</span> *<span class="title">FirstCell</span>;</span></span><br><span class="line">  ElementType TopElem;</span><br><span class="line">  <span class="keyword">if</span>(IsEmpty(S))&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"堆栈空"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    FirstCell = S-&gt;Next;</span><br><span class="line">    S-&gt;Next = FirstCell-&gt;Next;</span><br><span class="line">    TopElem = FirstCell-&gt;Element;</span><br><span class="line">    <span class="built_in">free</span>(FirstCell);</span><br><span class="line">    <span class="keyword">return</span> TopElem;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-4堆栈的应用"><a href="#2-4堆栈的应用" class="headerlink" title="2.4堆栈的应用"></a>2.4堆栈的应用</h4><ul>
+<li>中缀表达式求值</li>
+<li>函数调用及递归实现</li>
+<li>深度优先搜索</li>
+<li>回溯算法</li>
+</ul>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/02/14/git%E7%AC%94%E8%AE%B0/"
+                    data-tooltip="git笔记"
+                    aria-label="下一篇: git笔记"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Diesen Beitrag teilen"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#table-of-contents" aria-label="目录">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2020 Huang. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/02/14/git%E7%AC%94%E8%AE%B0/"
+                    data-tooltip="git笔记"
+                    aria-label="下一篇: git笔记"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Diesen Beitrag teilen"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#table-of-contents" aria-label="目录">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                        aria-label="分享到 Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                        aria-label="分享到 Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://github.com/hwj1995/2020/02/23/%E6%B5%99%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AC%94%E8%AE%B0/"
+                        aria-label="分享到 Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">Huang</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-nsvcvjakkoutsz6mkswp0ngk2acjx9nyxnwmulvysc6bgh94vwaaq4xarmif.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+</body>
+</html>
